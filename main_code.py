@@ -1,4 +1,3 @@
-
 from cmath import pi
 from logging import NullHandler
 from math import inf
@@ -43,13 +42,10 @@ def distEucSq(X,Y):
     XX = XX.reshape(len(XX),1)
     XX_tile = np.tile(XX, n)
     YY_tile = np.stack([YY for _ in range(m)], axis=0)
-    # print(np.shape(XX_tile),np.shape(YY_tile))
-    # print(np.shape(np.dot(X,np.conjugate(Y.T))))
 
     D = XX_tile + YY_tile - 2*( np.dot(X, np.conjugate(Y.T)) )
     if float("nan") in D:
         print("There is NaN in function of distEucSq")
-    #D = XX[:,np.ones(n)] + YY[np.ones(m),:] - 2*X*np.conjugate(Y.T)
     return D
 
 
@@ -80,15 +76,9 @@ def OPW(X,Y, l1, l2, delta, VERBOSE):
     for i in range(N):
         for j in range(M):
             d = abs( (i+1)/N - (j+1)/M )/mid_para
-            # if math.isnan(d):
-            #     print("d=NaN")
-            # elif d==0:
-            #     print("d=0")
-            # elif math.isinf(d):
-            #     print("d=inf")
             P[i][j] = math.exp(-(d**2)/(2*(delta**2))) / (delta*np.sqrt(2*pi))
-            if math.exp(-(d**2)/(2*(delta**2))) / (delta*np.sqrt(2*pi)) == 0:
-                print(i,j, " is zero")
+#             if math.exp(-(d**2)/(2*(delta**2))) / (delta*np.sqrt(2*pi)) == 0:
+#                 print(i,j, " is zero")
 
     S = np.zeros((N,M))
     for i in range(N):
@@ -96,11 +86,11 @@ def OPW(X,Y, l1, l2, delta, VERBOSE):
             S[i][j] = l1 / (((i+1)/N - (j+1)/M)**2 + 1)
     
     D = pdist2(X,Y,"squclidean")
-    D = D / max(list(map(lambda x: max(x), D)))
-    # D = D / (10**2)
-    # print("(S - D)/l2=",(S - D)/l2)
-    # print("S=",S)
-    # print("D=",D)
+#     In cases the instances in sequences are not normalized and/or are very
+#     high-dimensional, the matrix D can be normalized or scaled as follows:
+#     D = D/max(max(D));  D = D/(10^2);
+#     D = D / max(list(map(lambda x: max(x), D)))
+#     D = D/(10**2)
     K = P * np.exp((S - D)/l2)
     if 0 in P:
         print("P three is 0")
@@ -110,17 +100,13 @@ def OPW(X,Y, l1, l2, delta, VERBOSE):
     b = b.reshape(len(b),1)
 
     ainvK = K / a
-    # if 0 in K:
-    #     print("K three is 0")
+
     compt = 0
     u = np.ones(N)/N
     u = u.reshape(len(u),1)
-    # if 0 in np.dot(np.conjugate(K.T), u):
-    #     print("there is zero")
    
     warnings.simplefilter('ignore', category=RuntimeWarning) 
-    # print("K=",K)
-    # print("u=",u)
+
     while compt < maxIter:
         u = 1 / np.dot(ainvK,  b / np.dot(np.conjugate(K.T), u))
         compt += 1
@@ -128,10 +114,9 @@ def OPW(X,Y, l1, l2, delta, VERBOSE):
             # v = b / (np.conjugate(K.T) * u)
             v = b / np.dot(np.conjugate(K.T), u)
             u = 1 / np.dot(ainvK ,v)
-            # print(v)
+   
             Criterion = np.linalg.norm(sum(abs(v * (np.conjugate(K.T)-b))), ord=p_norm)
-            # print(" Criterion: ",str(Criterion))
-            # print(" tolerance: ", str(tolerance))
+     
             if Criterion < tolerance or math.isnan(Criterion):
                 break
 
